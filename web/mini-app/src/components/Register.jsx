@@ -5,7 +5,9 @@ import { useNavigate } from 'react-router-dom';
 
 const Register = () => {
   const [formData, setFormData] = useState({
-    username: '',
+    firstName: '',
+    lastName: '',
+    username: '', 
     email: '',
     password: '',
     confirmPassword: ''
@@ -26,22 +28,31 @@ const Register = () => {
     setError('');
     setSuccess('');
     
+    // Validation
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
       return;
     }
     
     try {
-      const response = await axios.post('http://localhost:8080/api/auth/register', {
-        username: formData.username,
+      const requestData = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        username: formData.username, 
         email: formData.email,
         password: formData.password
-      });
+      };
+      
+      const response = await axios.post('http://localhost:8080/api/auth/register', requestData);
       
       setSuccess('Registration successful! Please login.');
       setTimeout(() => navigate('/login'), 2000);
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed');
+      if (err.message) {
+        setError(`Registration failed: ${err.message}`);
+      } else {
+        setError('Registration failed: Unknown error');
+      }
     }
   };
 
@@ -55,6 +66,29 @@ const Register = () => {
           {success && <Alert variant="success">{success}</Alert>}
           
           <Form onSubmit={handleSubmit}>
+            <Form.Group className="mb-3">
+              <Form.Label>First Name</Form.Label>
+              <Form.Control
+                type="text"
+                name="firstName"
+                value={formData.firstName}
+                onChange={handleChange}
+                required
+                autoFocus
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Last Name</Form.Label>
+              <Form.Control
+                type="text"
+                name="lastName"
+                value={formData.lastName}
+                onChange={handleChange}
+                required
+              />
+            </Form.Group>
+
             <Form.Group className="mb-3">
               <Form.Label>Username</Form.Label>
               <Form.Control
@@ -85,6 +119,7 @@ const Register = () => {
                 value={formData.password}
                 onChange={handleChange}
                 required
+                minLength="6"
               />
             </Form.Group>
             
