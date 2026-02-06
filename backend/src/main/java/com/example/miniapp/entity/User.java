@@ -1,4 +1,4 @@
-package com.auth.model;
+package com.example.miniapp.model;
 
 import jakarta.persistence.*;
 import lombok.Data;

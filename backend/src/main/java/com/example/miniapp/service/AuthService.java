@@ -1,4 +1,4 @@
-package com.auth.service;
+package com.example.miniapp.service;
 
 import com.auth.model.*;
 import com.auth.repository.UserRepository;
