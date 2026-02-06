@@ -1,4 +1,4 @@
-package com.auth.controller;
+package com.example.miniapp.controller;
 
 import com.auth.model.*;
 import com.auth.service.AuthService;
