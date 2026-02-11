@@ -89,4 +89,9 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
     }
+
+    @GetMapping("/dashboard")
+    public ResponseEntity<String> getDashboard() {
+        return ResponseEntity.ok("Welcome to your dashboard!");
+    }
 }
