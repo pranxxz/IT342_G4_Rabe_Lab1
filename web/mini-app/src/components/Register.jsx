@@ -45,8 +45,9 @@ const Register = () => {
       
       const response = await axios.post('http://localhost:8080/api/auth/register', requestData);
       
-      setSuccess('Registration successful! Please login.');
-      setTimeout(() => navigate('/login'), 2000);
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+      navigate('/dashboard');
     } catch (err) {
       if (err.message) {
         setError(`Registration failed: ${err.message}`);
