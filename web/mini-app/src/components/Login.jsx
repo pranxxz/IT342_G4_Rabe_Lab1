@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Form, Button, Container, Card, Alert } from 'react-bootstrap';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import authService from '../service/authService'; // Import authService
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -9,6 +9,7 @@ const Login = () => {
     password: ''
   });
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -18,22 +19,61 @@ const Login = () => {
     });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   setError('');
+  //   setLoading(true);
     
-    try {
-      const response = await axios.post('http://localhost:8080/api/auth/login', {
-        email: formData.email,
-        password: formData.password
-      });
+  //   try {
+  //     const response = await authService.login({
+  //       email: formData.email,
+  //       password: formData.password
+  //     });
       
-      localStorage.setItem('token', response.data.token);
+  //     if (response.success) {
+  //       navigate('/dashboard');
+  //     } else {
+  //       setError(response.message || 'Login failed');
+  //     }
+  //   } catch (err) {
+  //     setError(err.response?.data?.message || err.message || 'Invalid email or password');
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError('');
+  setLoading(true);
+  
+  try {
+    console.log('1. Starting login...');
+    
+    const response = await authService.login({
+      email: formData.email,
+      password: formData.password
+    });
+    
+    console.log('2. Login response:', response);
+    console.log('3. response.success value:', response.success);
+    console.log('4. response object keys:', Object.keys(response));
+    
+    if (response.success === true) {
+      console.log('5. Login successful! Navigating to dashboard...');
       navigate('/dashboard');
-    } catch (err) {
-      setError('Invalid email or password');
+      console.log('6. navigate() called');
+    } else {
+      console.log('7. Login failed in response');
+      setError(response.message || 'Login failed');
     }
-  };
+  } catch (err) {
+    console.log('8. Login error:', err);
+    setError('Login failed');
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <Container className="mt-5" style={{ maxWidth: '400px' }}>
@@ -52,6 +92,7 @@ const Login = () => {
                 value={formData.email}
                 onChange={handleChange}
                 required
+                autoFocus
               />
             </Form.Group>
             
@@ -66,8 +107,13 @@ const Login = () => {
               />
             </Form.Group>
             
-            <Button variant="primary" type="submit" className="w-100">
-              Login
+            <Button 
+              variant="primary" 
+              type="submit" 
+              className="w-100"
+              disabled={loading}
+            >
+              {loading ? 'Logging in...' : 'Login'}
             </Button>
             
             <div className="text-center mt-3">

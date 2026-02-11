@@ -1,36 +1,50 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Container, Button, Alert } from 'react-bootstrap';
+import { Card, Container, Button, Alert, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import authService from '../service/authService'; // Import authService
 
 const Dashboard = () => {
-  const [dashboardData, setDashboardData] = useState(null);
+  const [userData, setUserData] = useState(null);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchDashboardData();
-  }, []);
-
-  const fetchDashboardData = async () => {
-    const token = localStorage.getItem('token');
+    // Check authentication
+    if (!authService.isAuthenticated()) {
+      navigate('/login');
+      return;
+    }
     
+    // Get user data
+    const user = authService.getCurrentUser();
+    if (user) {
+      setUserData(user);
+    }
+    
+    // Validate token with backend (optional)
+    authService.validateToken().catch(() => {
+      // Token validation failed - logout will happen automatically
+    });
+    
+    setLoading(false);
+  }, [navigate]);
+
+  const handleLogout = async () => {
     try {
-      const response = await axios.get('http://localhost:8080/api/auth/dashboard', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      setDashboardData(response.data);
+      await authService.logout();
     } catch (err) {
-      setError('Failed to fetch dashboard data');
+      console.error('Logout error:', err);
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    navigate('/login');
-  };
+  if (loading) {
+    return (
+      <Container className="mt-5 text-center">
+        <Spinner animation="border" />
+      </Container>
+    );
+  }
 
   return (
     <Container className="mt-5">
@@ -42,14 +56,15 @@ const Dashboard = () => {
           
           <div className="text-center mb-4">
             <h4>Welcome to Your Dashboard!</h4>
+            {userData && (
+              <div>
+                <p>Hello, {userData.firstName} {userData.lastName}!</p>
+                <p><strong>Username:</strong> {userData.username}</p>
+                <p><strong>Email:</strong> {userData.email}</p>
+              </div>
+            )}
             <p>This is a protected page that only authenticated users can access.</p>
           </div>
-          
-          {dashboardData && (
-            <div className="alert alert-info">
-              <strong>Dashboard Content:</strong> {dashboardData}
-            </div>
-          )}
           
           <div className="text-center mt-4">
             <Button variant="danger" onClick={handleLogout}>

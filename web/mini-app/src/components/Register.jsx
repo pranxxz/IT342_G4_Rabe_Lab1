@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Form, Button, Container, Card, Alert } from 'react-bootstrap';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import authService from '../service/authService'; 
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -14,6 +14,7 @@ const Register = () => {
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -27,32 +28,72 @@ const Register = () => {
     e.preventDefault();
     setError('');
     setSuccess('');
+    setLoading(true);
     
     // Validation
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
+      setLoading(false);
+      return;
+    }
+    
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters');
+      setLoading(false);
       return;
     }
     
     try {
-      const requestData = {
+      console.log("Sending registration data:", {
         firstName: formData.firstName,
         lastName: formData.lastName,
-        username: formData.username, 
+        username: formData.username,
         email: formData.email,
         password: formData.password
-      };
+      });
       
-      const response = await axios.post('http://localhost:8080/api/auth/register', requestData);
+      // Call authService.register
+      const response = await authService.register({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        username: formData.username,
+        email: formData.email,
+        password: formData.password
+      });
+      
+      console.log("Registration response:", response);
       
       setSuccess('Registration successful! Please login.');
       setTimeout(() => navigate('/login'), 2000);
+      
     } catch (err) {
-      if (err.message) {
-        setError(`Registration failed: ${err.message}`);
-      } else {
-        setError('Registration failed: Unknown error');
+      console.error("Registration error details:", {
+        message: err.message,
+        status: err.status,
+        responseData: err.responseData
+      });
+      
+      // Extract error message
+      let errorMessage = 'Registration failed';
+      
+      if (err.responseData) {
+        // Try different possible error message fields
+        errorMessage = err.responseData.message || 
+                      err.responseData.error || 
+                      err.responseData.details || 
+                      'Registration failed';
+        
+        // If it's an array of errors, join them
+        if (Array.isArray(errorMessage)) {
+          errorMessage = errorMessage.join(', ');
+        }
+      } else if (err.message) {
+        errorMessage = err.message;
       }
+      
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -134,8 +175,13 @@ const Register = () => {
               />
             </Form.Group>
             
-            <Button variant="primary" type="submit" className="w-100">
-              Register
+            <Button 
+              variant="primary" 
+              type="submit" 
+              className="w-100"
+              disabled={loading}
+            >
+              {loading ? 'Registering...' : 'Register'}
             </Button>
             
             <div className="text-center mt-3">
