@@ -1,20 +1,63 @@
-.dashboard-container {
+/* Reset and Layout */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body, html {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.dashboard-layout {
   display: flex;
-  min-height: 100vh;
+  width: 100vw;
+  height: 100vh;
+  background-color: #e2e2e2;
 }
 
 .main-content {
-  margin-left: 250px;
-  padding: 20px;
-  width: 100%;
+  flex: 1; /* Fills remaining space next to sidebar */
+  height: 100%;
+  overflow-y: auto;
+  padding: 10px;
+  display: flex; 
+  flex-direction: column;
 }
 
-@media (max-width: 768px) {
-  .sidebar {
-    width: 200px;
-  }
-  
-  .main-content {
-    margin-left: 200px;
-  }
+.full-height-container {
+  flex: 1; 
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+}
+
+.stretch-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  border: none !important;
+  border-radius: 15px !important;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1) !important;
+  padding: 15px;
+}
+
+.stretch-card .card-body {
+  flex: 1; /* Makes the white body area expand to the bottom */
+}
+
+.dashboard-card {
+  border: none !important;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1) !important;
+  border-radius: 15px !important;
+}
+
+.welcome-banner {
+  background: linear-gradient(135deg, rgba(82, 34, 88, 0.05) 0%, rgba(140, 48, 97, 0.05) 100%);
+  padding: 2.5rem;
+  border-radius: 20px;
+  border: 1px solid rgba(82, 34, 88, 0.1);
+  text-align: center;
 }

@@ -1,9 +1,22 @@
 import React, { useState } from 'react';
-import { Form, Button, Container, Card, Alert } from 'react-bootstrap';
+import { 
+  Typography, 
+  Box,
+  Alert,
+  CircularProgress
+} from "@mui/material";
+import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import {
+  EmailField,
+  PasswordField,
+  InputField,
+  NameFieldsRow,
+  GradientButton, 
+  UsernameField
+} from "./RegisterComponents";
 
-const Register = () => {
+export default function StyledRegister() {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -13,24 +26,27 @@ const Register = () => {
     confirmPassword: ''
   });
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleChange = (e) => {
+  const handleChange = (field) => (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [field]: e.target.value
     });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    setSuccess('');
+    setIsLoading(true);
     
     // Validation
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
+      setIsLoading(false);
       return;
     }
     
@@ -47,106 +63,223 @@ const Register = () => {
       
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('user', JSON.stringify(response.data.user));
-      navigate('/dashboard');
+      
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 500);
+      
     } catch (err) {
-      if (err.message) {
-        setError(`Registration failed: ${err.message}`);
-      } else {
-        setError('Registration failed: Unknown error');
-      }
+      setError(err.response?.data?.message || 'Registration failed. Please try again.');
+      setIsLoading(false);
     }
   };
 
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(!showConfirmPassword);
+  };
+
   return (
-    <Container className="mt-5" style={{ maxWidth: '400px' }}>
-      <Card>
-        <Card.Body>
-          <Card.Title className="text-center mb-4">Register</Card.Title>
-          
-          {error && <Alert variant="danger">{error}</Alert>}
-          {success && <Alert variant="success">{success}</Alert>}
-          
-          <Form onSubmit={handleSubmit}>
-            <Form.Group className="mb-3">
-              <Form.Label>First Name</Form.Label>
-              <Form.Control
-                type="text"
-                name="firstName"
-                value={formData.firstName}
-                onChange={handleChange}
-                required
-                autoFocus
-              />
-            </Form.Group>
+    // MAIN BACKGROUND WRAPPER
+    <Box sx={{
+      width: '100vw',
+      minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: '#e2e2e2',
+      overflow: 'hidden',
+      position: 'relative'
+    }}>
+      
+      {/* --- Floating Circles --- */}
+      <div className="bg-shape shape-1"></div>
+      <div className="bg-shape shape-2"></div>
+      <div className="bg-shape shape-3"></div>
 
-            <Form.Group className="mb-3">
-              <Form.Label>Last Name</Form.Label>
-              <Form.Control
-                type="text"
-                name="lastName"
-                value={formData.lastName}
-                onChange={handleChange}
-                required
-              />
-            </Form.Group>
+      {/* --- CONTAINER (The Card) --- */}
+      <Box className="container" sx={{
+        backgroundColor: '#fff',
+        borderRadius: '30px',
+        boxShadow: '0 5px 15px rgba(0, 0, 0, 0.35)',
+        position: 'relative',
+        overflow: 'hidden',
+        width: '100%',
+        maxWidth: '550px',
+        minHeight: '750px',
+        zIndex: 100,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '40px'
+      }}>
+        
+        {/* --- FORM SECTION (Register) --- */}
+        <Box sx={{ width: '100%', maxWidth: '450px' }}>
+          <Box sx={{ textAlign: 'center', mb: 3 }}>
+            <Typography 
+              variant="h3"
+              sx={{ 
+                fontWeight: 700,
+                fontSize: '2rem',
+                color: '#4B0082',
+                mb: 1
+              }}
+            >
+              Create Account
+            </Typography>
+            <Typography variant="body1" sx={{ color: '#6b7280', fontSize: '0.95rem', mb: 2 }}>
+              Sign up to get started with your account
+            </Typography>
+          </Box>
 
-            <Form.Group className="mb-3">
-              <Form.Label>Username</Form.Label>
-              <Form.Control
-                type="text"
-                name="username"
-                value={formData.username}
-                onChange={handleChange}
-                required
-              />
-            </Form.Group>
-            
-            <Form.Group className="mb-3">
-              <Form.Label>Email</Form.Label>
-              <Form.Control
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-              />
-            </Form.Group>
-            
-            <Form.Group className="mb-3">
-              <Form.Label>Password</Form.Label>
-              <Form.Control
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-                minLength="6"
-              />
-            </Form.Group>
-            
-            <Form.Group className="mb-3">
-              <Form.Label>Confirm Password</Form.Label>
-              <Form.Control
-                type="password"
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                required
-              />
-            </Form.Group>
-            
-            <Button variant="primary" type="submit" className="w-100">
-              Register
-            </Button>
-            
-            <div className="text-center mt-3">
-              Already have an account? <a href="/login">Login here</a>
-            </div>
-          </Form>
-        </Card.Body>
-      </Card>
-    </Container>
+          {error && (
+            <Alert 
+              severity="error" 
+              sx={{ mb: 3, borderRadius: 2 }}
+              onClose={() => setError('')}
+            >
+              {error}
+            </Alert>
+          )}
+
+          <form onSubmit={handleSubmit}>
+            {/* Name Fields Row */}
+            <NameFieldsRow
+              firstName={formData.firstName}
+              lastName={formData.lastName}
+              onFirstNameChange={handleChange('firstName')}
+              onLastNameChange={handleChange('lastName')}
+            />
+
+            {/* Username Field */}
+            <UsernameField
+              label="Username"
+              placeholder="Choose a username"
+              value={formData.username}
+              onChange={handleChange('username')}
+            />
+
+            {/* Email Field */}
+            <EmailField
+              value={formData.email}
+              onChange={handleChange('email')}
+              placeholder="Enter your email"
+            />
+
+            {/* Password Field */}
+            <PasswordField
+              label="Password"
+              placeholder="Create a password"
+              value={formData.password}
+              onChange={handleChange('password')}
+              showPassword={showPassword}
+              onToggleVisibility={togglePasswordVisibility}
+              helperText="Password must be at least 6 characters long"
+            />
+
+            {/* Confirm Password Field */}
+            <PasswordField
+              label="Confirm Password"
+              placeholder="Confirm your password"
+              value={formData.confirmPassword}
+              onChange={handleChange('confirmPassword')}
+              showPassword={showConfirmPassword}
+              onToggleVisibility={toggleConfirmPasswordVisibility}
+            />
+
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+              <GradientButton
+                type="submit"
+                disabled={isLoading}
+                sx={{ minWidth: '200px' }}
+              >
+                {isLoading ? (
+                  <>
+                    <CircularProgress size={20} sx={{ color: 'white', mr: 1 }} />
+                    Creating Account...
+                  </>
+                ) : (
+                  'Create Account'
+                )}
+              </GradientButton>
+            </Box>
+          </form>
+
+          <Box sx={{ textAlign: 'center', mt: 3 }}>
+            <Typography variant="body2" sx={{ color: '#6b7280' }}>
+              Already have an account?{' '}
+              <Link 
+                to="/login" 
+                style={{ color: '#8C3061', fontWeight: 600, textDecoration: 'none' }}
+              >
+                Sign in here
+              </Link>
+            </Typography>
+          </Box>
+
+        </Box>
+
+        {/* --- STYLES --- */}
+        <style>{`
+        .bg-shape {
+            position: absolute;
+            border-radius: 50%;
+            z-index: 1; 
+            opacity: 0.25; 
+            animation: float 12s infinite ease-in-out;
+        }
+
+        .shape-1 {
+            top: -5%;
+            left: -5%;
+            width: 400px;
+            height: 400px;
+            background: #764ba2; 
+            animation-delay: 0s;
+        }
+
+        .shape-2 {
+            bottom: -5%;
+            right: -5%;
+            width: 500px;
+            height: 500px;
+            background: #764ba2; 
+            animation-delay: 5s;
+        }
+        
+        .shape-3 {
+            bottom: 40%;
+            left: 10%;
+            width: 200px;
+            height: 200px;
+            background: #4B0082; 
+            opacity: 0.15;
+            animation-delay: 2s;
+            animation-duration: 15s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); }
+            50% { transform: translateY(-40px) translateX(30px); }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 20px;
+                min-height: auto;
+                padding: 30px 20px !important;
+            }
+            .bg-shape {
+                display: none; 
+            }
+        }
+      `}</style>
+      </Box>
+
+    </Box>
   );
-};
-
-export default Register;
+}
