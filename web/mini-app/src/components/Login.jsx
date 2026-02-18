@@ -1,11 +1,29 @@
-import React, { useState } from 'react';
-import { Form, Button, Container, Card, Alert, Row, Col, Spinner, Image } from 'react-bootstrap';
-import { FaEnvelope, FaLock, FaEye, FaEyeSlash, FaSignInAlt } from 'react-icons/fa';
-import axios from 'axios';
+import React, { useState, useEffect } from 'react';
+import { 
+  Typography, 
+  Box,
+  Alert,
+  CircularProgress
+} from "@mui/material";
 import { useNavigate, Link } from 'react-router-dom';
-import './Login.css'; 
+import axios from 'axios';
+import {
+  EmailField,
+  PasswordField,
+  GradientButton
+} from "./RegisterComponents";
 
-const Login = () => {
+// Color palette
+const colors = {
+  primary: '#522258',
+  secondary: '#8C3061',
+  accent: '#C63C51',
+  light: '#D95F59',
+  text: '#4b5563',
+  textLight: '#9ca3af',
+};
+
+export default function StyledLogin() {
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -16,10 +34,10 @@ const Login = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
 
-  const handleChange = (e) => {
+  const handleChange = (field) => (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [field]: e.target.value
     });
   };
 
@@ -54,7 +72,7 @@ const Login = () => {
   };
 
   // Pre-fill remembered email on component mount
-  React.useEffect(() => {
+  useEffect(() => {
     const rememberedEmail = localStorage.getItem('rememberedEmail');
     if (rememberedEmail) {
       setFormData(prev => ({ ...prev, email: rememberedEmail }));
@@ -62,158 +80,178 @@ const Login = () => {
     }
   }, []);
 
-  return (
-    <Container fluid className="login-container">
-      <Row className="vh-100 align-items-center justify-content-center">
-        <Col xs={12} md={8} lg={6} xl={4}>
-          <Card className="login-card shadow-lg border-0">
-            <Card.Body className="p-4 p-md-5">
-              
-              {/* Logo/Brand Section */}
-              <div className="text-center mb-4">
-                <div className="logo-container mb-3">
-                  <FaSignInAlt className="logo-icon" />
-                </div>
-                <Card.Title className="h3 fw-bold text-primary">Welcome Back</Card.Title>
-                <p className="text-primary">Sign in to your account to continue</p>
-              </div>
-              
-              {error && (
-                <Alert 
-                  variant="danger" 
-                  className="d-flex align-items-center fade-in"
-                  dismissible
-                  onClose={() => setError('')}
-                >
-                  <FaEnvelope className="me-2" />
-                  {error}
-                </Alert>
-              )}
-              
-              <Form onSubmit={handleSubmit} className="mt-4">
-                {/* Email Input */}
-                <Form.Group className="mb-4">
-                  <Form.Label className="fw-medium text-primary">Email Address</Form.Label>
-                  <div className="input-group">
-                    <span className="input-group-text bg-light border-end-0">
-                      <FaEnvelope className="text-secondary" />
-                    </span>
-                    <Form.Control
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      className="border-start-0"
-                      placeholder="Enter your email"
-                      required
-                    />
-                  </div>
-                </Form.Group>
-                
-                {/* Password Input */}
-                <Form.Group className="mb-3">
-                  <div className="d-flex justify-content-between align-items-center">
-                    <Form.Label className="fw-medium text-primary">Password</Form.Label>
-                    <Link 
-                      to="/forgot-password" 
-                      className="text-decoration-none text-primary fs-7"
-                    >
-                      Forgot password?
-                    </Link>
-                  </div>
-                  <div className="input-group">
-                    <span className="input-group-text bg-light border-end-0">
-                      <FaLock className="text-secondary" />
-                    </span>
-                    <Form.Control
-                      type={showPassword ? "text" : "password"}
-                      name="password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      className="border-start-0 border-end-0"
-                      placeholder="Enter your password"
-                      required
-                    />
-                    <button
-                      type="button"
-                      className="input-group-text bg-light border-start-0"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? (
-                        <FaEyeSlash className="text-secondary" />
-                      ) : (
-                        <FaEye className="text-secondary" />
-                      )}
-                    </button>
-                  </div>
-                </Form.Group>
-                
-                {/* Remember Me Checkbox
-                <Form.Group className="mb-4">
-                  <Form.Check
-                    type="checkbox"
-                    label="Remember me"
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                    className="text-secondary"
-                  />
-                </Form.Group>
-                 */}
-                {/* Submit Button */}
-                <Button
-                  variant="primary"
-                  type="submit"
-                  className="w-100 py-3 fw-semibold shadow-sm"
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <>
-                      <Spinner
-                        as="span"
-                        animation="border"
-                        size="sm"
-                        role="status"
-                        aria-hidden="true"
-                        className="me-2"
-                      />
-                      Signing In...
-                    </>
-                  ) : (
-                    <span className="text-secondary">
-                      <FaSignInAlt className="me-2" color='#0B2D72' />
-                      Sign In
-                    </span>
-                  )}
-                </Button>
-                
-                {/* Registration Link */}
-                <div className="text-center mt-4 pt-3">
-                  <p className="text-primary mb-0">
-                    Don't have an account?{' '}
-                    <Link 
-                      to="/register" 
-                      className="text-decoration-none fw-semibold text-primary"
-                    >
-                      Create an account
-                    </Link>
-                  </p>
-                </div>
-              </Form>
-            </Card.Body>
-            
-            <Card.Footer className="text-center py-3 bg-light">
-              <small className="text-muted">
-                By continuing, you agree to our{' '}
-                <a href="/terms" className="text-decoration-none">Terms</a>
-                {' '}and{' '}
-                <a href="/privacy" className="text-decoration-none">Privacy Policy</a>
-              </small>
-            </Card.Footer>
-          </Card>
-        </Col>
-      </Row>
-    </Container>
-  );
-};
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
 
-export default Login;
+  return (
+    // MAIN BACKGROUND WRAPPER
+    <Box sx={{
+      width: '100vw',
+      minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: '#e2e2e2',
+      overflow: 'hidden',
+      position: 'relative'
+    }}>
+      
+      {/* --- Floating Circles --- */}
+      <div className="bg-shape shape-1"></div>
+      <div className="bg-shape shape-2"></div>
+      <div className="bg-shape shape-3"></div>
+
+      {/* --- CONTAINER (The Card) --- */}
+      <Box className="container" sx={{
+        backgroundColor: '#fff',
+        borderRadius: '30px',
+        boxShadow: '0 5px 15px rgba(0, 0, 0, 0.35)',
+        position: 'relative',
+        overflow: 'hidden',
+        width: '100%',
+        maxWidth: '500px',
+        minHeight: '600px',
+        zIndex: 100,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '40px'
+      }}>
+        
+        {/* --- FORM SECTION (Sign In) --- */}
+        <Box sx={{ width: '100%', maxWidth: '380px' }}>
+          <Box sx={{ textAlign: 'center', mb: 4 }}>
+            <Typography 
+              variant="h3"
+              sx={{ 
+                fontWeight: 700,
+                fontSize: '2rem',
+                color: colors.primary,
+                mb: 1
+              }}
+            >
+              Welcome Back
+            </Typography>
+            <Typography variant="body1" sx={{ color: colors.text, fontSize: '0.95rem', mb: 3 }}>
+              Sign in to your account to continue
+            </Typography>
+          </Box>
+
+          {error && (
+            <Alert 
+              severity="error" 
+              sx={{ mb: 3, borderRadius: 2 }}
+              onClose={() => setError('')}
+            >
+              {error}
+            </Alert>
+          )}
+
+          <form onSubmit={handleSubmit}>
+            <EmailField
+              value={formData.email}
+              onChange={handleChange('email')}
+              placeholder="Enter your email"
+            />
+
+            <PasswordField
+              label="Password"
+              placeholder="Enter your password"
+              value={formData.password}
+              onChange={handleChange('password')}
+              showPassword={showPassword}
+              onToggleVisibility={togglePasswordVisibility}
+            />
+
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+              <GradientButton
+                type="submit"
+                disabled={isLoading}
+                sx={{ minWidth: '200px' }}
+              >
+                {isLoading ? (
+                  <>
+                    <CircularProgress size={20} sx={{ color: 'white', mr: 1 }} />
+                    Signing In...
+                  </>
+                ) : (
+                  'Sign In'
+                )}
+              </GradientButton>
+            </Box>
+          </form>
+
+          <Box sx={{ textAlign: 'center', mt: 3 }}>
+            <Typography variant="body2" sx={{ color: colors.text }}>
+              Don't have an account?{' '}
+              <Link 
+                to="/register" 
+                style={{ color: colors.secondary, fontWeight: 600, textDecoration: 'none' }}
+              >
+                Create an account
+              </Link>
+            </Typography>
+          </Box>
+        </Box>
+
+        {/* --- STYLES --- */}
+        <style>{`
+        .bg-shape {
+            position: absolute;
+            border-radius: 50%;
+            z-index: 1; 
+            opacity: 0.2; 
+            animation: float 12s infinite ease-in-out;
+        }
+
+        .shape-1 {
+            top: -5%;
+            left: -5%;
+            width: 400px;
+            height: 400px;
+            background: ${colors.primary}; 
+            animation-delay: 0s;
+        }
+
+        .shape-2 {
+            bottom: -5%;
+            right: -5%;
+            width: 500px;
+            height: 500px;
+            background: ${colors.secondary}; 
+            animation-delay: 5s;
+        }
+        
+        .shape-3 {
+            bottom: 40%;
+            left: 10%;
+            width: 200px;
+            height: 200px;
+            background: ${colors.accent}; 
+            opacity: 0.15;
+            animation-delay: 2s;
+            animation-duration: 15s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); }
+            50% { transform: translateY(-40px) translateX(30px); }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 20px;
+                min-height: auto;
+                padding: 30px 20px !important;
+            }
+            .bg-shape {
+                display: none; 
+            }
+        }
+      `}</style>
+      </Box>
+
+    </Box>
+  );
+}
